@@ -1,0 +1,37 @@
+version: "3.3"
+services:
+  spark-master:
+    image: atulawate/spark_kafka:spark24
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      - spark-network
+    environment:
+      - "SPARK_LOCAL_IP=spark-master"
+      - "SPARK_MASTER_PORT=7077"
+      - "SPARK_MASTER_WEBUI_PORT=8080"
+    command: "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host $SPARK_LOCAL_IP --port $SPARK_MASTER_PORT --webui-port $SPARK_MASTER_WEBUI_PORT"
+    volumes:
+      - ../data:/data
+  spark-worker:
+    image: atulawate/spark_kafka:spark24
+    depends_on:
+      - spark-master
+    ports:
+      - 8181:8080
+    networks:
+      - spark-network
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "SPARK_WORKER_WEBUI_PORT=8080"
+    command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port $SPARK_WORKER_WEBUI_PORT $SPARK_MASTER"
+    volumes:
+      - ../data:/data
+networks:
+  spark-network:
+    driver: bridge
+    ipam:
+      driver: default

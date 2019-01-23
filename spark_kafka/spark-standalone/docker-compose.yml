@@ -1,0 +1,16 @@
+version: "3.3"
+services:
+  spark-master:
+    image: atulawate/spark_kafka:spark24
+    container_name: spark-helper
+    hostname: spark-helper
+    networks:
+      - spark-network
+    volumes:
+      - ../data:/data
+    command: /bin/bash
+    tty: true
+networks:
+  spark-network:
+    external:
+      name: 24_spark-network
